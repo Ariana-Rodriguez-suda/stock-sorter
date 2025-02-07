@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Sorter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Stock Sorter</h1>
+
+        <label for="ordenarCategoria">Ordenar por Categoría:</label>
+        <select id="ordenarCategoria">
+            <option value="sinCambio">Sin Cambio</option>
+            <option value="Pantalon">Pantalon</option>
+            <option value="Camiseta">Camiseta</option>
+            <option value="Camisa">Camisa</option>
+            <option value="Blusa">Blusa</option>
+            <option value="Falda">Falda</option>
+            <option value="Vestido">Vestido</option>
+            <option value="Short">Short</option>
+            <option value="Abrigo">Abrigo</option>
+        </select>
+
+        <label for="ordenarTalla">Ordenar por Talla:</label>
+        <select id="ordenarTalla">
+            <option value="sinCambio">Sin Cambio</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+        </select>
+
+        <label for="ordenarGenero">Ordenar por Género:</label>
+        <select id="ordenarGenero">
+            <option value="sinCambio">Sin Cambio</option>
+            <option value="Hombre">Hombre</option>
+            <option value="Mujer">Mujer</option>
+        </select>
+
+        <label for="ordenarPrecio">Ordenar por Precio:</label>
+        <select id="ordenarPrecio">
+            <option value="sinCambio">Sin Cambio</option>
+            <option value="asc">Menor a Mayor</option>
+            <option value="desc">Mayor a Menor</option>
+        </select>
+
+        <button onclick="ordenarProductos()">Cargar Productos</button>
+
+        <h2>Lista de Productos</h2>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        let productos = [];
+
+        function mostrarProductos() {
+            let lista = "<ul>";
+            for (let i = 0; i < productos.length; i++) {
+                lista += "<li>" + productos[i].nombre + " (" + productos[i].categoria + ") - Talla: " + productos[i].talla +
+                         " - Género: " + productos[i].genero + " - Precio: $" + productos[i].precio.toFixed(2) + " - Stock: " + productos[i].stock + "</li>";
+            }
+            lista += "</ul>";
+            document.getElementById("resultado").innerHTML = lista;
+        }
+
+        function ordenarProductos() {
+            fetch("http://localhost:3000/productos")
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    productos = data;
+
+                    let ordenarCategoria = document.getElementById("ordenarCategoria").value;
+                    if (ordenarCategoria !== "sinCambio") {
+                        productos = productos.filter(function(producto) {
+                            return producto.categoria === ordenarCategoria;
+                        });
+                    }
+
+                    let ordenarTalla = document.getElementById("ordenarTalla").value;
+                    if (ordenarTalla !== "sinCambio") {
+                        productos = productos.filter(function(producto) {
+                            return producto.talla === ordenarTalla;
+                        });
+                    }
+
+                    let ordenarGenero = document.getElementById("ordenarGenero").value;
+                    if (ordenarGenero !== "sinCambio") {
+                        productos = productos.filter(function(producto) {
+                            return producto.genero === ordenarGenero;
+                        });
+                    }
+
+                    let ordenarPrecio = document.getElementById("ordenarPrecio").value;
+                    if (ordenarPrecio !== "sinCambio") {
+                        productos.sort(function(a, b) {
+                            let precioA = parseFloat(a.precio);
+                            let precioB = parseFloat(b.precio);
+                            return ordenarPrecio === "asc" ? precioA - precioB : precioB - precioA;
+                        });
+                    }
+
+                    mostrarProductos();
+                })
+                .catch(function(error) {
+                    alert("Error al obtener productos: " + error);
+                });
+        }
+    </script>
+
+</body>
+</html>
